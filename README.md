@@ -1,2 +1,2 @@
-# Example
-An example greeter plugin
+# Total Selling Cost
+A plugin for the popular Old School Runescape third party launcher Runelite that aims to assist in calculating the total gold amount gained from selling items to a store in varying quantities.
