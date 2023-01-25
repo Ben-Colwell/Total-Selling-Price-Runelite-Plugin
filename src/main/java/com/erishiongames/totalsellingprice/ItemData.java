@@ -1,11 +1,15 @@
 package com.erishiongames.totalsellingprice;
 
+import net.runelite.api.ItemComposition;
+import net.runelite.api.ItemContainer;
+
+import javax.inject.Inject;
+
 public class ItemData {
     private int id;
     private int quantity;
     private int value;
     private String name;
-
 
     public ItemData(int id, int quantity, int value, String name) {
         this.id = id;

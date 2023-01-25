@@ -5,10 +5,7 @@ import javax.inject.Inject;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.ChatMessageType;
-import net.runelite.api.Client;
-import net.runelite.api.GameState;
-import net.runelite.api.ItemContainer;
+import net.runelite.api.*;
 import net.runelite.api.events.*;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetID;
@@ -44,6 +41,9 @@ public class TotalSellingPrice extends Plugin {
 	@Inject
 	private TotalSellingPriceConfig config;
 
+	@Inject
+	private ItemManager itemManager;
+
 	@Override
 	protected void startUp() throws Exception
 	{
@@ -58,29 +58,43 @@ public class TotalSellingPrice extends Plugin {
 
 
 
-//[Item(id=995, quantity=16997435), Item(id=556, quantity=934), Item(id=554, quantity=7736), Item(id=557, quantity=994), Item(id=555, quantity=1000), Item(id=563, quantity=98)]
 	//93 is player inventory
 	@Subscribe
 	public void onItemContainerChanged(ItemContainerChanged itemContainerChanged){
-		int containerId = itemContainerChanged.getContainerId();
-		ItemContainer itemContainer= itemContainerChanged.getItemContainer();
-		System.out.println("HI");
-		System.out.println(Arrays.toString(itemContainer.getItems()));
+//		ItemContainer itemContainer= itemContainerChanged.getItemContainer();
+//		System.out.println(Arrays.toString(itemContainer.getItems()));
 	}
 
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked menuOptionClicked){
 		//Check if the player is in a shop interface and if they are checking the value of an item
 		if(widgetHandler.isShopOpen() && Text.removeTags(menuOptionClicked.getMenuOption()).equals("Value")) {
+			int itemID = menuOptionClicked.getItemId();
+			String currentShopName = widgetHandler.getCurrentShopName();
+			Widget clickedWidget = menuOptionClicked.getWidget();
+			int clickedWidgetId = clickedWidget.getId();
+			int clickedWidgetParentId = clickedWidget.getParentId();
+			String itemName = removeTags(menuOptionClicked.getMenuTarget(), TAG_REGEXP);
 
-			String currentShop = widgetHandler.getCurrentShopName();
-			Widget currentWidget = menuOptionClicked.getWidget();
-			int parentID = currentWidget.getParentId();
-			System.out.println("HI FROM MENU");
+			switch (clickedWidgetId) {
+				case WidgetHandler.SHOP_INVENTORY_WIDGET_ID:
+					//display value of clicked item
+					int baseValue = itemManager.getItemComposition(itemID).getPrice();
+
+
+					System.out.println(menuOptionClicked.getWidget().getName());
+					System.out.println(menuOptionClicked.getMenuTarget());
+					System.out.println(itemName);
+					break;
+
+				case WidgetHandler.SHOP_PLAYER_INVENTORY_WIDGET_ID:
+					client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Selling is not setup yet!", null);
+					break;
+			}
 		}
 	}
 
-
+	//This is not my code. Found in the Total Cost Plugin by Fiffers.
 	private static String removeTags(String str, Pattern pattern)
 	{
 		StringBuffer stringBuffer = new StringBuffer();
