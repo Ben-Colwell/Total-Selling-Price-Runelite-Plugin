@@ -1,5 +1,6 @@
 package com.erishiongames.totalsellingprice;
 
+import static com.erishiongames.totalsellingprice.TotalSellingPrice.PLUGIN_NAME;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -13,11 +14,11 @@ import net.runelite.client.plugins.PluginDescriptor;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Total Selling Price"
+	name = PLUGIN_NAME
 )
 public class TotalSellingPrice extends Plugin {
-	public final String pluginName = "Total Selling Price";
-
+	public static final String PLUGIN_NAME = "Total Selling Price";
+	public static final String CONFIG_GROUP = "totalsellingprice";
 
 	@Inject
 	private Client client;
@@ -46,7 +47,8 @@ public class TotalSellingPrice extends Plugin {
 
 	public void createChatMessage(String message)
 	{
-		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", pluginName + ": " + message, null);
+		System.out.println(PLUGIN_NAME + ": " + message);
+		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", PLUGIN_NAME + ": " + message, null);
 	}
 
 
@@ -55,15 +57,6 @@ public class TotalSellingPrice extends Plugin {
 	public void onItemContainerChanged(ItemContainerChanged itemContainerChanged)
 	{
 
-	}
-
-	@Subscribe
-	public void onGameStateChanged(GameStateChanged gameStateChanged)
-	{
-		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
-		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.greeting(), null);
-		}
 	}
 
 	@Provides

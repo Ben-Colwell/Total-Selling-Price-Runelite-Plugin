@@ -3,20 +3,18 @@ package com.erishiongames.totalsellingprice;
 
 public class ItemData {
     private int id;
-    private int quantity;
     private int value;
     private String name;
-    private int lowAlchValue;
-	private int highAlchValue;
+    private double lowAlchValue;
+	private double highAlchValue;
 
-    public ItemData(int id, int quantity, int value, String name, int lowAlchValue, int highAlchValue)
+    public ItemData(int id, int value, String name)
 	{
         this.id = id;
-        this.quantity = quantity;
         this.value = value;
         this.name = name;
-        this.lowAlchValue = lowAlchValue;
-		this.highAlchValue = highAlchValue;
+        lowAlchValue = value * 0.4;
+		highAlchValue = value * 0.6;
     }
 
     public ItemData()
@@ -31,20 +29,14 @@ public class ItemData {
         this.id = id;
     }
 
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
     public int getValue() {
         return value;
     }
 
     public void setValue(int value) {
         this.value = value;
+		lowAlchValue = value * 0.4;
+		highAlchValue = value * 0.6;
     }
 
     public String getName() {
@@ -55,15 +47,17 @@ public class ItemData {
         this.name = name;
     }
 
-    public int getLowAlchValue() {
+    public double getLowAlchValue() {
         return lowAlchValue;
     }
 
     public void setLowAlchValue(int lowAlchValue) {
         this.lowAlchValue = lowAlchValue;
+		value = (lowAlchValue * 5) / 2;
+		highAlchValue = value * 0.6;
     }
 
-	public int getHighAlchValue()
+	public double getHighAlchValue()
 	{
 		return highAlchValue;
 	}
@@ -71,5 +65,7 @@ public class ItemData {
 	public void setHighAlchValue(int highAlchValue)
 	{
 		this.highAlchValue = highAlchValue;
+		value = (highAlchValue * 5) / 3;
+		lowAlchValue = value * 0.4;
 	}
 }
