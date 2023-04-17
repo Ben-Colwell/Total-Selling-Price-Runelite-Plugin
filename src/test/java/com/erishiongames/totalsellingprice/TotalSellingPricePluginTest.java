@@ -1,6 +1,5 @@
-package com.erishiongames;
+package com.erishiongames.totalsellingprice;
 
-import com.erishiongames.totalsellingprice.TotalSellingPrice;
 import net.runelite.client.RuneLite;
 import net.runelite.client.externalplugins.ExternalPluginManager;
 
