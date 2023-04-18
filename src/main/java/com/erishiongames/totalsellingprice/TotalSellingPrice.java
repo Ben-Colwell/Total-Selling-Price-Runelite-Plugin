@@ -5,10 +5,8 @@ import com.google.inject.Provides;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
-import net.runelite.api.events.*;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
-import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 
@@ -42,21 +40,6 @@ public class TotalSellingPrice extends Plugin {
 	protected void shutDown() throws Exception
 	{
 		eventBus.unregister(widgetHandler);
-	}
-
-
-	public void createChatMessage(String message)
-	{
-		System.out.println(PLUGIN_NAME + ": " + message);
-		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", PLUGIN_NAME + ": " + message, null);
-	}
-
-
-	//93 is player inventory
-	@Subscribe
-	public void onItemContainerChanged(ItemContainerChanged itemContainerChanged)
-	{
-
 	}
 
 	@Provides

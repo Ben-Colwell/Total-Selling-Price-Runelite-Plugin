@@ -1,5 +1,6 @@
 package com.erishiongames.totalsellingprice;
 
+import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.events.GameTick;
@@ -42,55 +43,41 @@ public class WidgetHandler {
 	@Inject
 	private TotalSellingPriceConfig config;
 
-	//fill out item data for the item being sold
-	//check how many of the item is already in the shops inventory, and how many you have
-	//create function to calculate the amount of gold earned per world
-
+	//calculate amount of items able to be sold before the price stagnates
 
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked clicked)
 	{
 		menuOptionClicked = clicked;
-		if(!isShopOpen() || !isCheckingValue())
-		{
-			return;
-		}
+
+		if(!isShopOpen() || !isCheckingValue()) return;
+
 		currentShopName = getCurrentShopName();
 		currentShop = getCurrentShop();
-		if (currentShop == null)
-		{
-			return;
-		}
+
+		if (currentShop == null) return;
+
 		assignWidgetVariables();
+
 		if (clickedInventory == inventoryType.NONE) return;
 		if (clickedInventory == inventoryType.SHOP_INVENTORY)
 		{
-			totalSellingPrice.createChatMessage("Buying from shops is not supported right now");
+			createChatMessage("Buying from shops is not supported right now");
 			return;
 		}
+
 		assignItemVariables();
 
-		amountOfItemInShopInventory = findAmountOfItemInInventory(shopItems);
 		amountOfItemInPlayerInventory = findAmountOfItemInInventory(playerItems);
+		amountOfItemInShopInventory = findAmountOfItemInInventory(shopItems);
 
-		if (config.calculateAmountOfWorldHopsNeeded())
-		{
-			float temp = amountOfItemInPlayerInventory / config.amountPerWorldToSell();
-
-			totalSellingPrice.createChatMessage("World hops needed: " + temp);
-		}
-
-
+		calculateAllGoldSellingOptions();
 
 	}
 
 	@Subscribe
 	public void onGameTick(GameTick gameTick)
 	{
-//		if (currentShop !=null)
-//		{
-//			totalSellingPrice.createChatMessage(currentShop.toString());
-//		}
 		if(currentShop != null && !isShopOpen())
 		{
 			resetVariables();
@@ -167,7 +154,7 @@ public class WidgetHandler {
 				return shopInfo;
 			}
 		}
-		totalSellingPrice.createChatMessage("this shop is not supported right now");
+		createChatMessage("this shop is not supported right now");
 		return null;
 	}
 
@@ -183,55 +170,100 @@ public class WidgetHandler {
 		return 0;
 	}
 
-	private void calculateGoldEarnedFromSelling(int amountPerWorld, float shopBuyPercent, float shopChangePercent)
+	private void calculateGoldEarnedFromSelling(int amountPerWorld)
 	{
 		double gold = 0;
 		for (int i = 0; i < amountPerWorld; i++)
 		{
-			gold += calculateStorePurchasePrice(shopBuyPercent, shopChangePercent);
+			gold += calculateStorePurchasePrice();
 		}
+		amountOfItemInShopInventory = findAmountOfItemInInventory(shopItems);
+		amountOfItemInPlayerInventory = findAmountOfItemInInventory(playerItems);
+
+
+		createProfitMessage(amountPerWorld, (int) gold);
+		displayAmountOfWorldHopsNeeded(amountPerWorld);
 	}
 
-	private double calculateStorePurchasePrice(float shopBuyPercent, float shopChangePercent)
+	private double calculateStorePurchasePrice()
 	{
-		float shopBuy = shopBuyPercent * 100;
-		float shopChange = shopChangePercent * 100;
+		float shopBuy = currentShop.getBuyPercent() * 100;
+		float shopChange = currentShop.getChangePercent() * 100;
 		float priceRedux = shopBuy - (shopChange * amountOfItemInShopInventory);
 		if (priceRedux < 10)
 		{
 			priceRedux = 10;
 		}
 		float sellPrice = (priceRedux / 100) * itemdata.getValue();
-
+		amountOfItemInShopInventory += 1;
+		amountOfItemInPlayerInventory -= 1;
 		return Math.floor(sellPrice);
 	}
 
+	private void displayAmountOfWorldHopsNeeded(int amountPerWorld)
+	{
+		if (config.calculateAmountOfWorldHopsNeeded())
+		{
+			int hopsNeeded = (int) (amountOfItemInPlayerInventory / amountPerWorld);
+			String colorHopsNeeded = colorMessage(String.format("%,d", hopsNeeded));
+			createChatMessage("World hops needed: " + colorHopsNeeded);
+		}
+	}
+
+	private void calculateAllGoldSellingOptions()
+	{
+		if (config.sell10())
+		{
+			calculateGoldEarnedFromSelling(10);
+		}
+		if (config.sell20())
+		{
+			calculateGoldEarnedFromSelling(20);
+		}
+		if (config.sell30())
+		{
+			calculateGoldEarnedFromSelling(30);
+		}
+		if (config.sell40())
+		{
+			calculateGoldEarnedFromSelling(40);
+		}
+		if (config.sell50())
+		{
+			calculateGoldEarnedFromSelling(50);
+		}
+		if (config.sellAll())
+		{
+			calculateGoldEarnedFromSelling((int) amountOfItemInPlayerInventory);
+		}
+		if (config.sellCustom() )
+		{
+			calculateGoldEarnedFromSelling(config.amountPerWorldToSell());
+		}
+	}
+
+	public void createChatMessage(String message)
+	{
+		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", message, null);
+	}
+
+	public void createProfitMessage(int amountPerWorld, int goldPerWorld)
+	{
+		int totalGold = (int) Math.floor(goldPerWorld * (amountOfItemInPlayerInventory / amountPerWorld));
+		int averageGold = goldPerWorld / amountPerWorld;
+		String colorAmountPerWorld = colorMessage(String.format("%,d", amountPerWorld));
+		String colorGoldPerWorld = colorMessage(String.format("%,d", goldPerWorld));
+		String colorAverageGold = colorMessage(String.format("%,d", averageGold));
+		String colorTotalGold = colorMessage(String.format("%,d", totalGold));
 
 
-	//    public void temp()
-//    {
-//            storeCalculator.itemData.setId(menuOptionClicked.getItemId());
-//
-//            int clickedWidgetId = clickedWidget.getId();
-//            int clickedWidgetParentId = clickedWidget.getParentId();
-//            String itemName = Text.removeFormattingTags(menuOptionClicked.getMenuTarget());
-//
-//            switch (clickedWidgetId)
-//            {
-//                case WidgetHandler.SHOP_INVENTORY_WIDGET_ID:
-//                    //display value of clicked item
-//                    int baseValue = itemManager.getItemComposition(itemID).getPrice();
-//
-//
-//                    System.out.println(menuOptionClicked.getWidget().getName());
-//                    System.out.println(menuOptionClicked.getMenuTarget());
-//                    System.out.println(itemName);
-//                    break;
-//
-//                case WidgetHandler.SHOP_PLAYER_INVENTORY_WIDGET_ID:
-//                    client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Selling is not setup yet!", null);
-//                    break;
-//            }
-//    }
-    }
+		createChatMessage("Sell " + colorAmountPerWorld + " profit: " + colorGoldPerWorld + " gold. Average: " + colorAverageGold + ". Total: " + colorTotalGold + ".");
+	}
+
+	public String colorMessage(String message)
+	{
+		String color = Integer.toHexString(config.highlightColor().getRGB()).substring(2);
+		return "<col=" + color + ">" + message + "</col>";
+	}
+}
 
