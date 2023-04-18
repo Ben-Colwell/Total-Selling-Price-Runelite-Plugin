@@ -1,5 +1,5 @@
 # Total Selling Cost
-A plugin aims to assist in calculating the total gold amount gained from selling items to a store in varying quantities.
+A plugin that aims to assist in calculating the total gold amount gained from selling items to a store in varying quantities.
 * Simply open a supported shop and click the menu option "value" on an item in your inventory.
 
 <img src="with%20worldhops.PNG" width="600" height="150">
