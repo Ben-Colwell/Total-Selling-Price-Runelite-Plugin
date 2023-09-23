@@ -7,6 +7,7 @@ A plugin that aims to assist in calculating the total gold amount gained from se
   * West Ardougne General Store
   * Pollnivneach general store
   * Legends Guild General Store
+* More shops will be included when I get around to adding them. Feel free to make a PR. Karamja stores will only include non diary versions.
 
 <img src="with%20worldhops.PNG" width="600" height="150">
 <img src="without%20worldhops.PNG" width="600" height="150">
