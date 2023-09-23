@@ -22,7 +22,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.erishiongames.totalsellingprice;
+package com.erishiongamesllc.totalsellingprice;
 
 import java.awt.Color;
 import net.runelite.client.config.Config;
@@ -30,7 +30,7 @@ import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 
-@ConfigGroup(TotalSellingPrice.CONFIG_GROUP)
+@ConfigGroup(TotalSellingPricePlugin.CONFIG_GROUP)
 public interface TotalSellingPriceConfig extends Config
 {
 	@ConfigSection

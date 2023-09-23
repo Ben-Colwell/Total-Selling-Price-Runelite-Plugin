@@ -22,9 +22,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.erishiongames.totalsellingprice;
+package com.erishiongamesllc.totalsellingprice;
 
-import static com.erishiongames.totalsellingprice.TotalSellingPrice.PLUGIN_NAME;
+import static com.erishiongamesllc.totalsellingprice.TotalSellingPricePlugin.PLUGIN_NAME;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ import net.runelite.client.plugins.PluginDescriptor;
 @PluginDescriptor(
 	name = PLUGIN_NAME
 )
-public class TotalSellingPrice extends Plugin {
+public class TotalSellingPricePlugin extends Plugin {
 	public static final String PLUGIN_NAME = "Total Selling Price";
 	public static final String CONFIG_GROUP = "totalsellingprice";
 
@@ -47,6 +47,9 @@ public class TotalSellingPrice extends Plugin {
 
 	@Inject
 	private WidgetHandler widgetHandler;
+
+	@Inject
+	private ShopCalculator shopCalculator;
 
 	@Inject
 	private TotalSellingPriceConfig config;
@@ -58,12 +61,14 @@ public class TotalSellingPrice extends Plugin {
 	protected void startUp() throws Exception
 	{
 		eventBus.register(widgetHandler);
+		eventBus.register(shopCalculator);
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
 		eventBus.unregister(widgetHandler);
+		eventBus.unregister(shopCalculator);
 	}
 
 	@Provides

@@ -1,6 +1,12 @@
-# Total Selling Cost
+# Total Selling Price
 A plugin that aims to assist in calculating the total gold amount gained from selling items to a store in varying quantities.
 * Simply open a supported shop and click the menu option "value" on an item in your inventory.
+* Current supported shops include
+  * Bandit Duty Free
+  * Martin Thwait's Lost and Found
+  * West Ardougne General Store
+  * Pollnivneach general store
+  * Legends Guild General Store
 
 <img src="with%20worldhops.PNG" width="600" height="150">
 <img src="without%20worldhops.PNG" width="600" height="150">

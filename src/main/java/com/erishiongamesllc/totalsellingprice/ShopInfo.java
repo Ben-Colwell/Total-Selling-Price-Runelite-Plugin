@@ -22,74 +22,48 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.erishiongames.totalsellingprice;
+package com.erishiongamesllc.totalsellingprice;
+
+public enum ShopInfo
+{
+	BANDIT_DUTY_FREE_GENERAL_STORE("Bandit Duty Free", 0.9f, 0.6f, 0.03f),
+	MARTIN_THWAITS_LOST_AND_FOUND("Martin Thwait's Lost and Found.", 1.0f, 0.6f, 0.02f),
+	WEST_ARDOUGNE_GENERAL_STORE("West Ardougne General Store", 1.2f, 0.55f, 0.02f),
+	POLLNIVNEACH_GENERAL_STORE("Pollnivneach general store.", 1.0f, 0.55f, 0.01f),
+	LEGENDS_GUILD_GENERAL_STORE("Legends Guild General Store.", 1.55f, 0.55f, 0.01f),
+	;
 
 
-public class ItemData {
-    private int id;
-    private int value;
-    private String name;
-    private double lowAlchValue;
-	private double highAlchValue;
+	private final String name;
+	private final float sellPercent;
+	private final float buyPercent;
+	private final float changePercent;
 
-    public ItemData(int id, int value, String name)
+	ShopInfo(String name, float sellPercent, float buyPercent, float changePercent)
 	{
-        this.id = id;
-        this.value = value;
-        this.name = name;
-        lowAlchValue = value * 0.4;
-		highAlchValue = value * 0.6;
-    }
-
-    public ItemData()
-	{
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getValue() {
-        return value;
-    }
-
-    public void setValue(int value) {
-        this.value = value;
-		lowAlchValue = value * 0.4;
-		highAlchValue = value * 0.6;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public double getLowAlchValue() {
-        return lowAlchValue;
-    }
-
-    public void setLowAlchValue(int lowAlchValue) {
-        this.lowAlchValue = lowAlchValue;
-		value = (lowAlchValue * 5) / 2;
-		highAlchValue = value * 0.6;
-    }
-
-	public double getHighAlchValue()
-	{
-		return highAlchValue;
+		this.name = name;
+		this.sellPercent = sellPercent;
+		this.buyPercent = buyPercent;
+		this.changePercent = changePercent;
 	}
 
-	public void setHighAlchValue(int highAlchValue)
+	public String getName()
 	{
-		this.highAlchValue = highAlchValue;
-		value = (highAlchValue * 5) / 3;
-		lowAlchValue = value * 0.4;
+		return name;
+	}
+
+	public float getSellPercent()
+	{
+		return sellPercent;
+	}
+
+	public float getBuyPercent()
+	{
+		return buyPercent;
+	}
+
+	public float getChangePercent()
+	{
+		return changePercent;
 	}
 }

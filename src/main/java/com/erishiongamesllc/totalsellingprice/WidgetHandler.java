@@ -22,8 +22,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.erishiongames.totalsellingprice;
+package com.erishiongamesllc.totalsellingprice;
 
+import lombok.Getter;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.ItemComposition;
@@ -47,19 +48,27 @@ public class WidgetHandler {
     private  MenuOptionClicked menuOptionClicked = null;
     private inventoryType clickedInventory = inventoryType.NONE;
     private String currentShopName = null;
-	private ShopInfo currentShop = null;
+
 	private ItemComposition itemComposition = null;
-	private ItemData itemdata = new ItemData();
+
 	private Widget[] shopItems = null;
 	private Widget[] playerItems = null;
-	private float amountOfItemInShopInventory = 0;
-	private float amountOfItemInPlayerInventory = 0;
+
+
+	@Getter
+	private ItemData itemData = new ItemData();
+	@Getter
+	private ShopInfo currentShop = null;
+	@Getter
+	private int amountOfItemInShopInventory = 0;
+	@Getter
+	private int amountOfItemInPlayerInventory = 0;
 
 	@Inject
     private Client client;
 
 	@Inject
-	private TotalSellingPrice totalSellingPrice;
+	private TotalSellingPricePlugin totalSellingPricePlugin;
 
     @Inject
     private ItemManager itemManager;
@@ -67,23 +76,33 @@ public class WidgetHandler {
 	@Inject
 	private TotalSellingPriceConfig config;
 
-	//calculate amount of items able to be sold before the price stagnates
+	@Inject
+	private ShopCalculator shopCalculator;
 
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked clicked)
 	{
 		menuOptionClicked = clicked;
 
-		if(!isShopOpen() || !isCheckingValue()) return;
+		if(!isShopOpen() || !isCheckingValue())
+		{
+			return;
+		}
 
 		currentShopName = getCurrentShopName();
-		currentShop = getCurrentShop();
+		currentShop = getCurrentShopValue();
 
-		if (currentShop == null) return;
+		if (currentShop == null)
+		{
+			return;
+		}
 
 		assignWidgetVariables();
 
-		if (clickedInventory == inventoryType.NONE) return;
+		if (clickedInventory == inventoryType.NONE)
+		{
+			return;
+		}
 		if (clickedInventory == inventoryType.SHOP_INVENTORY)
 		{
 			createChatMessage("Buying from shops is not supported right now");
@@ -95,8 +114,7 @@ public class WidgetHandler {
 		amountOfItemInPlayerInventory = findAmountOfItemInInventory(playerItems);
 		amountOfItemInShopInventory = findAmountOfItemInInventory(shopItems);
 
-		calculateAllGoldSellingOptions();
-
+		shopCalculator.calculateAllGoldSellingOptions();
 	}
 
 	@Subscribe
@@ -121,9 +139,9 @@ public class WidgetHandler {
 	{
 		itemComposition = itemManager.getItemComposition(menuOptionClicked.getItemId());
 
-		itemdata.setName(itemComposition.getName());
-		itemdata.setId(itemComposition.getId());
-		itemdata.setValue(itemComposition.getPrice());
+		itemData.setName(itemComposition.getName());
+		itemData.setId(itemComposition.getId());
+		itemData.setValue(itemComposition.getPrice());
 		shopItems = Objects.requireNonNull(client.getWidget(SHOP_INVENTORY_WIDGET_ID)).getChildren();
 		playerItems = Objects.requireNonNull(client.getWidget(SHOP_PLAYER_INVENTORY_WIDGET_ID)).getChildren();
 	}
@@ -137,7 +155,7 @@ public class WidgetHandler {
 		currentShopName = null;
 		currentShop = null;
 		itemComposition = null;
-		itemdata = new ItemData();
+		itemData = new ItemData();
 		shopItems = null;
 		playerItems = null;
 		amountOfItemInShopInventory = 0;
@@ -169,7 +187,7 @@ public class WidgetHandler {
         return inventoryType.NONE;
     }
 
-	private ShopInfo getCurrentShop()
+	private ShopInfo getCurrentShopValue()
 	{
 		for (ShopInfo shopInfo : ShopInfo.values())
 		{
@@ -186,7 +204,7 @@ public class WidgetHandler {
 	{
 		for (Widget item: inventory)
 		{
-			if (item.getName().contains(itemdata.getName()))
+			if (item.getName().contains(itemData.getName()))
 			{
 				return item.getItemQuantity();
 			}
@@ -194,100 +212,15 @@ public class WidgetHandler {
 		return 0;
 	}
 
-	private void calculateGoldEarnedFromSelling(int amountPerWorld)
-	{
-		double gold = 0;
-		for (int i = 0; i < amountPerWorld; i++)
-		{
-			gold += calculateStorePurchasePrice();
-		}
-		amountOfItemInShopInventory = findAmountOfItemInInventory(shopItems);
-		amountOfItemInPlayerInventory = findAmountOfItemInInventory(playerItems);
 
 
-		createProfitMessage(amountPerWorld, (int) gold);
-		displayAmountOfWorldHopsNeeded(amountPerWorld);
-	}
 
-	private double calculateStorePurchasePrice()
-	{
-		float shopBuy = currentShop.getBuyPercent() * 100;
-		float shopChange = currentShop.getChangePercent() * 100;
-		float priceRedux = shopBuy - (shopChange * amountOfItemInShopInventory);
-		if (priceRedux < 10)
-		{
-			priceRedux = 10;
-		}
-		float sellPrice = (priceRedux / 100) * itemdata.getValue();
-		amountOfItemInShopInventory += 1;
-		amountOfItemInPlayerInventory -= 1;
-		return Math.floor(sellPrice);
-	}
 
-	private void displayAmountOfWorldHopsNeeded(int amountPerWorld)
-	{
-		if (config.calculateAmountOfWorldHopsNeeded())
-		{
-			int hopsNeeded = (int) (amountOfItemInPlayerInventory / amountPerWorld);
-			String colorHopsNeeded = colorMessage(String.format("%,d", hopsNeeded));
-			createChatMessage("World hops needed: " + colorHopsNeeded);
-		}
-	}
 
-	private void calculateAllGoldSellingOptions()
-	{
-		if (config.sell10())
-		{
-			calculateGoldEarnedFromSelling(10);
-		}
-		if (config.sell20())
-		{
-			calculateGoldEarnedFromSelling(20);
-		}
-		if (config.sell30())
-		{
-			calculateGoldEarnedFromSelling(30);
-		}
-		if (config.sell40())
-		{
-			calculateGoldEarnedFromSelling(40);
-		}
-		if (config.sell50())
-		{
-			calculateGoldEarnedFromSelling(50);
-		}
-		if (config.sellAll())
-		{
-			calculateGoldEarnedFromSelling((int) amountOfItemInPlayerInventory);
-		}
-		if (config.sellCustom() )
-		{
-			calculateGoldEarnedFromSelling(config.amountPerWorldToSell());
-		}
-	}
+
 
 	public void createChatMessage(String message)
 	{
 		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", message, null);
 	}
-
-	public void createProfitMessage(int amountPerWorld, int goldPerWorld)
-	{
-		int totalGold = (int) Math.floor(goldPerWorld * (amountOfItemInPlayerInventory / amountPerWorld));
-		int averageGold = goldPerWorld / amountPerWorld;
-		String colorAmountPerWorld = colorMessage(String.format("%,d", amountPerWorld));
-		String colorGoldPerWorld = colorMessage(String.format("%,d", goldPerWorld));
-		String colorAverageGold = colorMessage(String.format("%,d", averageGold));
-		String colorTotalGold = colorMessage(String.format("%,d", totalGold));
-
-
-		createChatMessage("Sell " + colorAmountPerWorld + " profit: " + colorGoldPerWorld + " gold. Average: " + colorAverageGold + ". Total: " + colorTotalGold + ".");
-	}
-
-	public String colorMessage(String message)
-	{
-		String color = Integer.toHexString(config.highlightColor().getRGB()).substring(2);
-		return "<col=" + color + ">" + message + "</col>";
-	}
 }
-
